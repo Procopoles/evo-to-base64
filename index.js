@@ -18,6 +18,9 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Configurar trust proxy para Vercel
+app.set('trust proxy', true);
+
 // Middlewares de segurança
 app.use(helmet());
 app.use(compression());
