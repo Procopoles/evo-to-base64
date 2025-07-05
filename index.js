@@ -67,7 +67,25 @@ async function downloadEncryptedFile(url) {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return await response.buffer();
+
+    // Garantir compatibilidade com diferentes implementações de fetch
+    // node-fetch (ambiente local) possui response.buffer(), mas no runtime do Vercel
+    // podemos ter apenas response.arrayBuffer(). Ambos os caminhos retornam um Buffer.
+    let data;
+    if (typeof response.buffer === 'function') {
+      data = await response.buffer();
+      // Caso alguma implementação retorne ArrayBuffer, convertemos explicitamente
+      if (!(data instanceof Buffer)) {
+        data = Buffer.from(data);
+      }
+    } else if (typeof response.arrayBuffer === 'function') {
+      const arrayBuf = await response.arrayBuffer();
+      data = Buffer.from(arrayBuf);
+    } else {
+      throw new Error('A resposta não suporta nem buffer() nem arrayBuffer()');
+    }
+
+    return data;
   } catch (error) {
     throw new Error(`Erro ao baixar arquivo: ${error.message}`);
   }
