@@ -26,8 +26,18 @@ function decryptWhatsAppMedia(mediaKey, encryptedData) {
     const macKey = expandedKey.slice(48, 80);      // Chave HMAC-SHA256
     
     // Separar dados criptografados e MAC
-    const encryptedMedia = encryptedData.slice(0, -10);
+    let encryptedMedia = encryptedData.slice(0, -10);
+
+    // Garantir novamente que encryptedMedia seja Buffer (caso slice retorne ArrayBuffer em alguma implementação)
+    if (!Buffer.isBuffer(encryptedMedia)) {
+      encryptedMedia = Buffer.from(encryptedMedia);
+    }
     const receivedMac = encryptedData.slice(-10);
+
+    if (!Buffer.isBuffer(receivedMac)) {
+      // slice pode retornar ArrayBuffer em algumas variantes
+      receivedMac = Buffer.from(receivedMac);
+    }
     
     // Calcular MAC dos dados
     const computedMac = crypto.createHmac('sha256', macKey)
