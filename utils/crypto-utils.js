@@ -8,6 +8,12 @@ const crypto = require('crypto');
  */
 function decryptWhatsAppMedia(mediaKey, encryptedData) {
   try {
+    // Garantir que encryptedData seja um Buffer
+    if (!Buffer.isBuffer(encryptedData)) {
+      // Pode vir como ArrayBuffer, Uint8Array, etc.
+      encryptedData = Buffer.from(encryptedData);
+    }
+
     // Converter mediaKey de base64 para buffer
     const mediaKeyBuffer = Buffer.from(mediaKey, 'base64');
     
@@ -56,6 +62,11 @@ function decryptWhatsAppMedia(mediaKey, encryptedData) {
  * @returns {boolean} - True se o formato for válido
  */
 function validateEncryptedData(encryptedData) {
+  // Garantir que encryptedData seja um Buffer para evitar erros de length/slice
+  if (!Buffer.isBuffer(encryptedData)) {
+    encryptedData = Buffer.from(encryptedData);
+  }
+  
   // Verificar se tem pelo menos 10 bytes (MAC)
   if (encryptedData.length < 10) {
     return false;
@@ -93,6 +104,9 @@ function validateMediaKey(mediaKey) {
  */
 function verifyFileSha256(decryptedData, expectedSha256) {
   try {
+    if (!Buffer.isBuffer(decryptedData)) {
+      decryptedData = Buffer.from(decryptedData);
+    }
     const computedHash = crypto.createHash('sha256').update(decryptedData).digest('base64');
     return computedHash === expectedSha256;
   } catch (error) {
@@ -108,6 +122,9 @@ function verifyFileSha256(decryptedData, expectedSha256) {
  */
 function verifyEncryptedFileSha256(encryptedData, expectedEncSha256) {
   try {
+    if (!Buffer.isBuffer(encryptedData)) {
+      encryptedData = Buffer.from(encryptedData);
+    }
     const computedHash = crypto.createHash('sha256').update(encryptedData).digest('base64');
     return computedHash === expectedEncSha256;
   } catch (error) {
